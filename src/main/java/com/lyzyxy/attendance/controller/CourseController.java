@@ -33,9 +33,9 @@ public class CourseController {
         c.setTeacherId(teacherId);
 
         if(courseService.save(c)){
-            return Result.success();
+            return Result.success(c);
         }else{
-            return Result.error();
+            return Result.error(c);
         }
     }
 

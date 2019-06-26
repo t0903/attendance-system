@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import sun.misc.BASE64Encoder;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.List;
 
 @RestController
@@ -74,9 +75,9 @@ public class UserController {
 			u.setIsTeacher(isTeacher ? 1 : 0);
 
 			if(userService.save(u))
-				return Result.success();
+				return Result.success(u);
 			else
-				return Result.error();
+				return Result.error(u);
 		}else{
 			return  Result.error("用户名重复！");
 		}
@@ -120,7 +121,17 @@ public class UserController {
 	 */
 	@PostMapping(value = "/upload")
 	//@AuthToken
-	public Result uploadImg(@RequestParam("id") int id, @RequestParam("file") MultipartFile file){
+	public Result uploadImg(@RequestParam("id") int id,@RequestParam("name") String name,
+                            @RequestParam("file") MultipartFile file){
+
+        BASE64Encoder base64Encoder = new BASE64Encoder();
+        String base64 = null;
+        try {
+            base64 = base64Encoder.encode(file.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
 		//图片上传调用工具类
 		boolean r = false;
 		try{
@@ -128,11 +139,12 @@ public class UserController {
 			String path =  FileUtil.saveImage(file);
 
 			if(path != null && !path.equals("")){
-				if(FaceUtil.checkQuality(path,"URL")){
+				if(FaceUtil.checkQuality(base64,"BASE64")){
 					User user = userService.getById(id);
 
 					FileUtil.deleteImage(user.getPhoto());
 
+					user.setName(name);
 					user.setPhoto(path);
 
 					r = userService.updateById(user);
