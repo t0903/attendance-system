@@ -4,7 +4,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.multipart.MultipartFile;
+import sun.misc.BASE64Encoder;
+
 import java.io.File;
+import java.io.FileInputStream;
 
 public class FileUtil {
     private static Logger logger = LoggerFactory.getLogger(FileUtil.class);
@@ -39,6 +42,35 @@ public class FileUtil {
         String filePath =  ConstantKit.VIRTUAL_IMG_PATH;;
         //返回相对路径  img/virtual/4ca64e85b1544c96b4a6154bb521476f.jpg
         return filePath + "/" + saveName;
+    }
+
+    public static String encodeBase64(String path) {
+        if(path == null || path.equals(""))
+            return null;
+
+        String[] s = path.split("/");
+        if(s != null && s.length > 0){
+            String name = s[s.length-1];
+
+            String  filePath = ConstantKit.UPLOAD_PATH + ConstantKit.IMG_FILE_NAME;
+
+            try {
+
+                File file = new File(filePath + "/" + name);
+                if (file.exists() && file.isFile()) {
+                    FileInputStream inputFile = new FileInputStream(file);
+                    byte[] buffer = new byte[(int)file.length()];
+                    inputFile.read(buffer);
+                    inputFile.close();
+                    return new BASE64Encoder().encode(buffer);
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+                logger.debug("--- 图片转换异常：{} ---" + e.getMessage());
+                return null;
+            }
+        }
+        return null;
     }
 
     /**

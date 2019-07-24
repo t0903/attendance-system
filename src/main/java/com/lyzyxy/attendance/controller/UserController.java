@@ -12,9 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import sun.misc.BASE64Encoder;
-
 import java.io.IOException;
-import java.net.InetAddress;
 import java.util.List;
 
 @RestController
@@ -183,7 +181,9 @@ public class UserController {
 			String photo = user.getPhoto();
 
         	if(photo != null && !photo.equals("")){
-				FaceUtil.addOrUpdateUser(photo,"URL",""+classId,""+userId);
+        		String base64 = FileUtil.encodeBase64(photo);
+        		if(base64 != null)
+					FaceUtil.addOrUpdateUser(base64,"BASE64",""+classId,""+userId);
 			}
 
             if(sc.insert()){
