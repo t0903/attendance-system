@@ -1,6 +1,5 @@
 package com.lyzyxy.attendance.controller;
 
-import com.lyzyxy.attendance.annotation.AuthToken;
 import com.lyzyxy.attendance.base.Result;
 import com.lyzyxy.attendance.utils.FileUtil;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,7 +35,6 @@ public class UploadController {
 //    }
 
     @PostMapping(value = "/img/delete")
-    //@AuthToken
     public Result deleteImg(@RequestParam("path") String path){
         //图片上传调用工具类
         try{

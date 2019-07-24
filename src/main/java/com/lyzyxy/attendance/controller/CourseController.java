@@ -1,11 +1,8 @@
 package com.lyzyxy.attendance.controller;
 
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.lyzyxy.attendance.annotation.AuthToken;
 import com.lyzyxy.attendance.base.Result;
 import com.lyzyxy.attendance.model.Course;
-import com.lyzyxy.attendance.model.User;
 import com.lyzyxy.attendance.service.ICourseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +20,6 @@ public class CourseController {
     private static final Logger logger = LoggerFactory.getLogger(CourseController.class);
 
     @RequestMapping("/add")
-    @AuthToken
     public Result add(String name, String className,int teacherId){
         Course c = new Course();
         c.setName(name);
@@ -38,7 +34,6 @@ public class CourseController {
     }
 
     @RequestMapping("/getCourses")
-    @AuthToken
     public Result getCourseByTeacher(int id){
         QueryWrapper<Course> queryWrapper = new QueryWrapper<>();
         queryWrapper.lambda()
@@ -50,7 +45,6 @@ public class CourseController {
     }
 
     @RequestMapping("/getJoinedCourses")
-    //@AuthToken
     public Result getJoinedCourses(int id){
         List<Course> courses = courseService.getJoinedCourses(id);
 

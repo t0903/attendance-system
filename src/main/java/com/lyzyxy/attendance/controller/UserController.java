@@ -18,18 +18,14 @@ import java.util.List;
 @RestController
 @RequestMapping("/user")
 public class UserController {
-
 	@Autowired
     private IUserService userService;
-	@Autowired
-	Md5TokenGenerator tokenGenerator;
-	@Autowired
-	private RedisUtils redisUtils;
 	
 	private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
-	@RequestMapping(value = "/auth", method = RequestMethod.GET)
-	public Result auth(String username, String password) {
+	//完成
+	@RequestMapping(value = "/login", method = RequestMethod.GET)
+	public Result login(String username, String password) {
 		QueryWrapper<User> queryWrapper = new QueryWrapper<>();
 		queryWrapper.lambda()
 				.eq(User::getUsername, username)
@@ -40,20 +36,9 @@ public class UserController {
 		logger.info("user:"+user);
 
 		if (user != null) {
-			String token = tokenGenerator.generate(username, password);
-			boolean r = redisUtils.set(username, token,(long)ConstantKit.TOKEN_EXPIRE_TIME);
-			r = r && redisUtils.set(token, username,(long)ConstantKit.TOKEN_EXPIRE_TIME);
-			Long currentTime = System.currentTimeMillis();
-			r = r && redisUtils.set(token + username, currentTime.toString());
-
-			if(r)
-				user.setToken(token);
-			else
-				user.setToken("");
-
-			return Result.success("token",user);
+			return Result.success("success",user);
 		} else {
-			return Result.error("token",null);
+			return Result.error("success",null);
 		}
 
 	}
@@ -81,23 +66,7 @@ public class UserController {
 		}
 	}
 
-	/**
-	 * 图片上传
-	 * @param
-	 * @return
-	 */
-//	@PostMapping(value = "/uploading")
-//	//@AuthToken
-//	public Result upload(@RequestParam("image") String base64){
-//
-//		//图片上传调用工具类
-//		boolean r = FaceUtil.checkQuality(base64,"BASE64");
-//
-//		return Result.success("chengg",r);
-//	}
-
 	@PostMapping(value = "/uploading")
-	//@AuthToken
 	public Result upload(@RequestParam("file") MultipartFile file){
 		BASE64Encoder base64Encoder =new BASE64Encoder();
 		String r = null;
@@ -118,7 +87,6 @@ public class UserController {
 	 * @return
 	 */
 	@PostMapping(value = "/upload")
-	//@AuthToken
 	public Result uploadImg(@RequestParam("id") int id,@RequestParam("name") String name,
                             @RequestParam("file") MultipartFile file){
 
@@ -195,19 +163,4 @@ public class UserController {
 
         return Result.success();
 	}
-
-	@RequestMapping("/test")
-	public Result test(){
-//		logger.info("test");
-//        return Result.success(userService.test());
-
-
-		User u = new User();
-		u.setId(1);
-		u.setPhoto("test");
-		if(userService.saveOrUpdate(u))
-			return Result.success("成功");
-		else
-			return Result.error("失败");
-    }
 }
