@@ -9,9 +9,10 @@
 		<result column="start" property="start" />
 		<result column="end" property="end" />
 		<result column="count" property="count" />
+		<result column="location" property="location" />
 	</resultMap>
 	
 	<sql id="Base_Column_List">
-        id, courseId,start,end,count
+        id, courseId,start,end,count,location
     </sql>
 </mapper>

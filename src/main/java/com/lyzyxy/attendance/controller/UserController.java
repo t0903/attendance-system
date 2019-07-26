@@ -35,7 +35,6 @@ public class UserController {
 	
 	private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
-	//完成
 	@RequestMapping(value = "/login", method = RequestMethod.GET)
 	public Result login(String username, String password) {
 		QueryWrapper<User> queryWrapper = new QueryWrapper<>();
@@ -181,32 +180,43 @@ public class UserController {
 	 * @param courseId
 	 * @return
 	 */
-	public Result launch(int userId,int courseId){
+    @RequestMapping("/launch")
+	public Result launch(int userId,int courseId,String location){
 		//TODO 根据userId检验用户是否为教师，以及是否为课程的任课老师
+        QueryWrapper<Record> queryWrapper = new QueryWrapper<>();
+        queryWrapper
+                .lambda()
+                .eq(Record::getCourseId,courseId)
+				.isNull(Record::getEnd);
+        List<Record> records = recordService.list(queryWrapper);
+
+        if(records.size() >= 1)
+            return Result.error("已经发起签到！");
 
 		Record record = new Record();
 		record.setCourseId(courseId);
+		record.setLocation(location);
 		record.setStart(new Date());
 
 		if(record.insert()){
 			return Result.success();
 		}else{
-			return Result.error();
+			return Result.error("发起签到失败！");
 		}
 	}
 
 	/**
 	 * 检测是否可以签到
-	 * @param userId
 	 * @param courseId
 	 * @return
 	 */
-	public Result ifSign(int userId,int courseId){
+    @RequestMapping("/ifSign")
+	public Result ifSign(int courseId){
 		QueryWrapper<Record> queryWrapper = new QueryWrapper<>();
 		queryWrapper
 				.lambda()
 				.eq(Record::getCourseId,courseId)
-				.eq(Record::getEnd,null);
+				.isNull(Record::getEnd);
 
 		List<Record> records = recordService.list(queryWrapper);
 
@@ -224,14 +234,15 @@ public class UserController {
 	 * @param studentId
 	 * @param courseId
 	 * @param recordId
-	 * @param distance
+	 * @param location
 	 * @param file
 	 * @return
 	 */
+    @PostMapping(value = "/sign")
 	public Result sign(@RequestParam("studentId") int studentId,
 					   @RequestParam("courseId") int courseId,
 					   @RequestParam("recordId") int recordId,
-					   @RequestParam("distance") int distance,
+					   @RequestParam("location") String location,
 					   @RequestParam("file") MultipartFile file){
 
 		//检测是否已经签过到
@@ -262,6 +273,21 @@ public class UserController {
 
 			//识别结果和学生是同一人的，保存签到
 			if(user_id == studentId){
+				String ll = recordService.getById(recordId).getLocation();
+
+				int distance = -1;
+
+				if(ll != null){
+					String[] d = ll.split(",");
+					double d0 = Double.parseDouble(d[0]);
+					double d1 = Double.parseDouble(d[1]);
+					String[] dd = location.split(",");
+					double dd0 = Double.parseDouble(dd[0]) - d0;
+					double dd1 = Double.parseDouble(dd[1]) - d1;
+
+					distance = (int)Math.sqrt(dd0*dd0 + dd1*dd1);
+				}
+
 				Sign sign = new Sign();
 				sign.setStudentId(user_id);
 				sign.setRecordId(recordId);
