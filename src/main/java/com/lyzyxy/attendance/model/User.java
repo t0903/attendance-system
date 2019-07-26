@@ -20,8 +20,6 @@ public class User extends Model<User> {
     private String photo;
     @TableField(value = "isTeacher")
     private int isTeacher;
-    @TableField(exist = false)
-    private String token;
 
     public Integer getId() {
         return id;
@@ -77,14 +75,6 @@ public class User extends Model<User> {
 
     public void setIsTeacher(int isTeacher) {
         this.isTeacher = isTeacher;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
     }
 
     @Override

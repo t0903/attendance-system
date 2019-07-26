@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
 
+import java.io.Serializable;
+
 @TableName("course")
 public class Course extends Model<Course> {
     @TableId(value="id", type= IdType.AUTO)
@@ -46,5 +48,10 @@ public class Course extends Model<Course> {
 
     public void setTeacherId(int teacherId) {
         this.teacherId = teacherId;
+    }
+
+    @Override
+    protected Serializable pkVal() {
+        return this.id;
     }
 }

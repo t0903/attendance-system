@@ -2,7 +2,11 @@ package com.lyzyxy.attendance.utils;
 
 import com.baidu.aip.face.AipFace;
 import com.baidu.aip.face.FaceVerifyRequest;
+import com.lyzyxy.attendance.controller.UserController;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -11,16 +15,22 @@ public class FaceUtil {
     public static final String API_KEY = "R9xy8w2L0VWkptYGqOVRQWET";
     public static final String SECRET_KEY = "NOQWyKf64FCZycrhz98TWh98Pxbx0nEV";
 
+    private static final Logger logger = LoggerFactory.getLogger(FaceUtil.class);
+
     public static final AipFace client = new AipFace(APP_ID, API_KEY, SECRET_KEY);
 
-//    public static void main(String[] args){
-//        String url = "http://cdn.ucshare.com.cn/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20180825210746.jpg";
-//        String url2 = "http://cdn.ucshare.com.cn/F104FAE33DD36C0C365BB73317C4402C.png";
-//        String url3 = "http://cdn.ucshare.com.cn/39C1639F7FF75E283A76365C11BDBB1D.png";
-//
-//        FaceUtil.checkQuality(url2,"URL");
-//    }
+    public static void main(String[] args){
+        String url = "http://cdn.ucshare.com.cn/a39ee1a6bf324178b9faab5f7a002a7e.jpg";
+        String url2 = "http://cdn.ucshare.com.cn/timg%20%288%29.jpg";
+        String url3 = "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1564070582597&di=fe6bc5bc6a77956208b4e415aeed52fd&imgtype=0&src=http%3A%2F%2Fphotocdn.sohu.com%2F20110524%2FImg308377006.jpg";
+        FaceUtil.search(url3,"URL","1");
+    }
 
+    /**
+     * 图片活体检测
+     * @param image
+     * @param imageType
+     */
     public static void antiSpoofing(String image,String imageType) {
         FaceVerifyRequest req = new FaceVerifyRequest(image, imageType);
         ArrayList<FaceVerifyRequest> list = new ArrayList<FaceVerifyRequest>();
@@ -29,6 +39,32 @@ public class FaceUtil {
         System.out.println(res.toString(2));
     }
 
+    public static JSONObject search(String image,String imageType,String groupId){
+        HashMap<String, String> options = new HashMap<String, String>();
+        options.put("quality_control", "NORMAL");
+        options.put("max_face_num", "1");
+        options.put("match_threshold", "70");
+        options.put("liveness_control", "LOW");
+
+        JSONObject res = client.search(image, imageType, groupId, options);
+
+        //System.out.println(res.toString(2));
+
+        if(res.getInt("error_code") == 0) {
+            res = res.getJSONObject("result");
+            return res.getJSONArray("user_list").getJSONObject(0);
+        }else {
+            logger.error("FaceUtil search error:"+res.toString(2));
+            return null;
+        }
+    }
+
+    /**
+     * 检测人脸照片的质量
+     * @param image
+     * @param imageType
+     * @return
+     */
     public static boolean checkQuality(String image,String imageType) {
         /*
         {
@@ -91,7 +127,7 @@ public class FaceUtil {
 
             res = res.getJSONObject("result");
 
-            System.out.println(res.toString(2));
+            //System.out.println(res.toString(2));
 
             if (res.getInt("face_num") == 1) {
                 JSONObject jsonObject = (JSONObject) res.getJSONArray("face_list").get(0);

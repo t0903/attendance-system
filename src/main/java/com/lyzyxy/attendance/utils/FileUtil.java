@@ -8,6 +8,7 @@ import sun.misc.BASE64Encoder;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 
 public class FileUtil {
     private static Logger logger = LoggerFactory.getLogger(FileUtil.class);
@@ -42,6 +43,13 @@ public class FileUtil {
         String filePath =  ConstantKit.VIRTUAL_IMG_PATH;;
         //返回相对路径  img/virtual/4ca64e85b1544c96b4a6154bb521476f.jpg
         return filePath + "/" + saveName;
+    }
+
+    public static String encodeBase64(byte[] val){
+        BASE64Encoder base64Encoder = new BASE64Encoder();
+        String base64 = base64Encoder.encode(val);
+
+        return base64;
     }
 
     public static String encodeBase64(String path) {

@@ -16,6 +16,15 @@
 	<sql id="Base_Column_List">
         id, username,password,name,no,photo,isTeacher
     </sql>
+
+	<select id="attendance" resultType="com.lyzyxy.attendance.dto.UserDto">
+		SELECT b.id,b.name,b.no,b.photo,b.s/c.ss rate FROM
+		 (SELECT a.*,COUNT(*) s FROM (SELECT user.* FROM USER LEFT JOIN sc ON user.`id` = sc.`studentId`
+		 WHERE sc.`classId` = #{courseId}) a LEFT JOIN SIGN ON a.id = sign.`studentId`
+		 GROUP BY a.id) b,
+		 (SELECT COUNT(*) ss FROM record WHERE courseId = #{courseId} AND COUNT != 0) c
+		 ORDER BY rate DESC
+	</select>
     
     <select id="test" resultType="map">
         select * from user
