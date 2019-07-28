@@ -9,4 +9,5 @@ public class UserDto {
     private String no;
     private String photo;
     private Double rate;
+    private Integer loss;
 }

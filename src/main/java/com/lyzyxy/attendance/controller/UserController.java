@@ -3,13 +3,16 @@ package com.lyzyxy.attendance.controller;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.lyzyxy.attendance.base.PushMessage;
 import com.lyzyxy.attendance.base.Result;
+import com.lyzyxy.attendance.dto.UserDto;
 import com.lyzyxy.attendance.model.Record;
 import com.lyzyxy.attendance.model.Sign;
 import com.lyzyxy.attendance.model.StudentCourse;
 import com.lyzyxy.attendance.model.User;
 import com.lyzyxy.attendance.service.IRecordService;
 import com.lyzyxy.attendance.service.ISignService;
+import com.lyzyxy.attendance.service.ISocketIOService;
 import com.lyzyxy.attendance.service.IUserService;
 import com.lyzyxy.attendance.utils.*;
 import org.json.JSONObject;
@@ -32,6 +35,8 @@ public class UserController {
 	private IRecordService recordService;
 	@Autowired
 	private ISignService signService;
+	@Autowired
+	private ISocketIOService socketIOService;
 	
 	private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
@@ -174,6 +179,11 @@ public class UserController {
         return Result.success();
 	}
 
+	@RequestMapping("/record")
+	public Result record(int courseId){
+		List<UserDto> userDtos = userService.attendance(courseId);
+		return Result.success(userDtos);
+	}
 	/**
 	 * 教师发起签到任务，需要手动关闭签到任务
 	 * @param userId
@@ -272,12 +282,12 @@ public class UserController {
 			double score = result.getDouble("score");
 
 			//识别结果和学生是同一人的，保存签到
-			if(user_id == studentId){
+			if(user_id != studentId){
 				String ll = recordService.getById(recordId).getLocation();
 
 				int distance = -1;
 
-				if(ll != null){
+				if(ll != null && !ll.equals("") && location != null && !location.equals("")){
 					String[] d = ll.split(",");
 					double d0 = Double.parseDouble(d[0]);
 					double d1 = Double.parseDouble(d[1]);
@@ -296,11 +306,16 @@ public class UserController {
 				sign.setTime(new Date());
 
 				if(userService.sign(sign)){
+					User user = userService.getById(studentId);
+					PushMessage message = new PushMessage(""+courseId,0,user.getName());
+					socketIOService.pushMessageToUser(message);
+
+					recordService.checkAllSignAsync(courseId,recordId);
+
 					return Result.success("签到成功！");
 				}
 			}
 		}
-
 		return Result.error("签到失败！");
 	}
 }
