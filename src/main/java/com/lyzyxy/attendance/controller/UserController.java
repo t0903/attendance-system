@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.lyzyxy.attendance.base.PushMessage;
 import com.lyzyxy.attendance.base.Result;
+import com.lyzyxy.attendance.dto.RecordDto;
+import com.lyzyxy.attendance.dto.SignResult;
 import com.lyzyxy.attendance.dto.UserDto;
 import com.lyzyxy.attendance.model.Record;
 import com.lyzyxy.attendance.model.Sign;
@@ -179,6 +181,11 @@ public class UserController {
         return Result.success();
 	}
 
+	/**
+	 * 每个学生签到率、缺到次数
+	 * @param courseId
+	 * @return
+	 */
 	@RequestMapping("/record")
 	public Result record(int courseId){
 		List<UserDto> userDtos = userService.attendance(courseId);
@@ -282,7 +289,7 @@ public class UserController {
 			double score = result.getDouble("score");
 
 			//识别结果和学生是同一人的，保存签到
-			if(user_id != studentId){
+			if(user_id == studentId){
 				String ll = recordService.getById(recordId).getLocation();
 
 				int distance = -1;
@@ -317,5 +324,41 @@ public class UserController {
 			}
 		}
 		return Result.error("签到失败！");
+	}
+
+	/**
+	 * 获取某每课程的签到记录
+	 * @param courseId
+	 * @return
+	 */
+	@RequestMapping("/signRecords")
+	public Result signRecords(int courseId){
+		List<RecordDto> recordDtos = recordService.getSignRecords(courseId);
+		return Result.success(recordDtos);
+	}
+
+	/**
+	 * 取消签到
+	 * @param courseId
+	 * @return
+	 */
+	@RequestMapping("/cancelSign")
+	public Result cancelSign(int courseId){
+		userService.cancelSign(courseId);
+
+		return Result.success();
+	}
+
+	/**
+	 * 获取某次课的签到结果
+	 * @param courseId
+	 * @param recordId
+	 * @return
+	 */
+	@RequestMapping("/getSignResult")
+	public Result getSignResult(int courseId,int recordId){
+		List<SignResult> signResults = signService.getSignResults(courseId,recordId);
+
+		return Result.success(signResults);
 	}
 }

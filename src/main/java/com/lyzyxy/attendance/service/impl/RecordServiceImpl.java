@@ -3,6 +3,7 @@ package com.lyzyxy.attendance.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lyzyxy.attendance.base.PushMessage;
+import com.lyzyxy.attendance.dto.RecordDto;
 import com.lyzyxy.attendance.mapper.RecordMapper;
 import com.lyzyxy.attendance.mapper.StudentCourseMapper;
 import com.lyzyxy.attendance.model.Record;
@@ -16,6 +17,7 @@ import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> implements IRecordService {
@@ -39,5 +41,9 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
             PushMessage message = new PushMessage(""+courseId,1,"共"+s+"人签到完成!");
             socketIOService.pushMessageToUser(message);
         }
+    }
+
+    public List<RecordDto> getSignRecords(int courseId){
+        return this.baseMapper.getSignRecords(courseId);
     }
 }
