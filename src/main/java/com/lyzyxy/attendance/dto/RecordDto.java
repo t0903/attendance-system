@@ -7,7 +7,7 @@ import java.util.Date;
 
 @Data
 public class RecordDto {
-    private int id;
+    private int id;//recordId
     private int courseId;
     private Date start;
     private Date end;

@@ -361,4 +361,19 @@ public class UserController {
 
 		return Result.success(signResults);
 	}
+
+    /**
+     * 设置 缺勤、请假、迟到、早退、已签到
+     * @param recordId
+     * @param signId
+     * @param studentId
+     * @param msg
+     * @return
+     */
+    @RequestMapping("/setSign")
+	public Result setSign(int recordId,int signId,int studentId,String msg){
+	    signService.setSign(recordId,signId,studentId,msg);
+
+	    return Result.success();
+    }
 }

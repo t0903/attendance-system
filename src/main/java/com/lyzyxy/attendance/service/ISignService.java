@@ -10,4 +10,5 @@ import java.util.List;
 
 public interface ISignService extends IService<Sign> {
     List<SignResult> getSignResults(int courseId, int recordId);
+    void setSign(int recordId,int signId,int studentId,String msg);
 }

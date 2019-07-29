@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class UserDto {
-    private int id;
+    private int id;//学生Id
     private String name;
     private String no;
     private String photo;

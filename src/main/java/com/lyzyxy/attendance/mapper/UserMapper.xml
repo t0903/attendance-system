@@ -26,7 +26,7 @@
 		 WHERE sc.`classId` = #{courseId}) a LEFT JOIN
 		(
 		SELECT studentId,COUNT(*) s FROM SIGN LEFT JOIN record ON sign.`recordId` = record.`id`
-		 WHERE END IS NOT NULL AND courseId = #{courseId}
+		 WHERE END IS NOT NULL AND courseId = #{courseId} and remarks is null
 		 GROUP BY studentId) b ON a.id = b.studentId
 		LEFT JOIN (
 		SELECT courseId,COUNT(*) ss FROM record WHERE END IS NOT NULL AND courseId = #{courseId}) c
