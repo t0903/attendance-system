@@ -19,7 +19,6 @@ public class Record extends Model<Record> {
     private int courseId;
     private Date start;
     private Date end;
-    private int count;
     private String location;
 
     @Override

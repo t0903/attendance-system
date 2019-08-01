@@ -11,7 +11,7 @@ public class RecordDto {
     private int courseId;
     private Date start;
     private Date end;
-    private int count;
+    private Integer count;//签到人数
     private String location;
-    private int sum;
+    private Integer sum;//选课人数
 }

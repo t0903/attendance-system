@@ -11,6 +11,6 @@ import java.util.Map;
 public interface IUserService extends IService<User> {
     List<Map<String, Object>> test();
     List<UserDto> attendance(int courseId);
-    boolean cancelSign(int courseId);
+    boolean cancelSign(int recordId);
     boolean sign(Sign sign);
 }

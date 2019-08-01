@@ -17,20 +17,22 @@
         id, username,password,name,no,photo,isTeacher
     </sql>
 
+	<!--获取每个学生的签到情况，包括签到率、缺勤率-->
 	<select id="attendance" resultType="com.lyzyxy.attendance.dto.UserDto">
-		 SELECT a.id,a.name,a.no,a.photo,b.s/c.ss rate,
-		  CASE WHEN b.s IS NULL THEN c.ss
-			ELSE c.ss-b.s END loss
-		  FROM
+		 SELECT a.id,a.name,a.no,a.photo,
+		 CASE WHEN b.s IS NULL THEN 0
+		 ELSE b.s/c.ss END rate,
+		CASE WHEN b.s IS NULL THEN c.ss
+		ELSE c.ss-b.s END loss
+		FROM
 		(SELECT user.*,sc.`classId` FROM USER LEFT JOIN sc ON user.`id` = sc.`studentId`
 		 WHERE sc.`classId` = #{courseId}) a LEFT JOIN
 		(
 		SELECT studentId,COUNT(*) s FROM SIGN LEFT JOIN record ON sign.`recordId` = record.`id`
-		 WHERE END IS NOT NULL AND courseId = #{courseId} and remarks is null
+		 WHERE END IS NOT NULL AND courseId = #{courseId} AND remarks IS NULL
 		 GROUP BY studentId) b ON a.id = b.studentId
 		LEFT JOIN (
-		SELECT courseId,COUNT(*) ss FROM record WHERE END IS NOT NULL AND courseId = #{courseId}) c
-		ON a.classId = c.courseId
+		SELECT courseId,COUNT(*) ss FROM record WHERE END IS NOT NULL AND courseId = #{courseId}) c ON a.classId = c.courseId
 		ORDER BY rate DESC
 	</select>
     

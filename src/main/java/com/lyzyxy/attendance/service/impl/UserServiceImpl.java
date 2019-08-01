@@ -35,34 +35,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         return this.baseMapper.attendance(courseId);
     }
 
-    @Transactional(readOnly = false)
     public boolean sign(Sign sign){
-        if(sign.insert()){
-            UpdateWrapper<Record> updateWrapper = new UpdateWrapper<>();
-            updateWrapper.lambda().eq(Record::getId,sign.getRecordId()).setSql("count = count + 1");
-
-            return recordService.update(updateWrapper);
-        }
-        return false;
+        return sign.insert();
     }
 
     @Transactional(readOnly = false)
-    public boolean cancelSign(int courseId){
-        QueryWrapper<Record> queryWrapper = new QueryWrapper<>();
-        queryWrapper
-                .lambda()
-                .eq(Record::getCourseId,courseId)
-                .isNull(Record::getEnd);
-
-        Record record = recordService.getOne(queryWrapper);
-
+    public boolean cancelSign(int recordId){
         UpdateWrapper<Sign> signUpdateWrapper = new UpdateWrapper<>();
         signUpdateWrapper
                 .lambda()
-                .eq(Sign::getRecordId,record.getId());
+                .eq(Sign::getRecordId,recordId);
 
         signService.remove(signUpdateWrapper);
 
-        return recordService.removeById(record.getId());
+        return recordService.removeById(recordId);
     }
 }

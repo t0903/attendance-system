@@ -9,7 +9,7 @@ public class SignResult {
     private String no;
     private String photo;
     private Integer signId;
-    private Double rate;
+    private Double rate;//图像识别正确率
     private Integer distance;
     private String remarks;
 }

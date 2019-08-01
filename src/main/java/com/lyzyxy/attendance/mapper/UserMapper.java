@@ -9,5 +9,11 @@ import java.util.Map;
 
 public interface UserMapper extends BaseMapper<User> {
     List<Map<String, Object>> test();
+
+    /**
+     * 获取每个学生的签到情况，包括签到率、缺勤率
+     * @param courseId
+     * @return
+     */
     List<UserDto> attendance(int courseId);
 }

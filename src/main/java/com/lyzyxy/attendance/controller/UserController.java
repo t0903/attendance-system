@@ -12,10 +12,7 @@ import com.lyzyxy.attendance.model.Record;
 import com.lyzyxy.attendance.model.Sign;
 import com.lyzyxy.attendance.model.StudentCourse;
 import com.lyzyxy.attendance.model.User;
-import com.lyzyxy.attendance.service.IRecordService;
-import com.lyzyxy.attendance.service.ISignService;
-import com.lyzyxy.attendance.service.ISocketIOService;
-import com.lyzyxy.attendance.service.IUserService;
+import com.lyzyxy.attendance.service.*;
 import com.lyzyxy.attendance.utils.*;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -39,6 +36,8 @@ public class UserController {
 	private ISignService signService;
 	@Autowired
 	private ISocketIOService socketIOService;
+	@Autowired
+	private IStudentCourseService studentCourseService;
 	
 	private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
@@ -105,8 +104,9 @@ public class UserController {
 	 * @return
 	 */
 	@PostMapping(value = "/upload")
-	public Result uploadImg(@RequestParam("id") int id,@RequestParam("name") String name,
-                            @RequestParam("file") MultipartFile file){
+	public Result uploadImg(@RequestParam("file") MultipartFile file,
+							@RequestParam("id") int id,@RequestParam("name") String name,
+							@RequestParam("no") String no,@RequestParam("username") String username){
         String base64 = null;
         try {
             base64 = FileUtil.encodeBase64(file.getBytes());
@@ -127,7 +127,10 @@ public class UserController {
 					FileUtil.deleteImage(user.getPhoto());
 
 					user.setName(name);
+					user.setNo(no);
 					user.setPhoto(path);
+					if(!username.trim().equals(""))
+						user.setUsername(username);
 
 					r = userService.updateById(user);
 				}else{
@@ -137,15 +140,28 @@ public class UserController {
 			}
 
 			if(r) {
-				return Result.success("上传照片成功", path);
+				return Result.success("修改信息成功", path);
 			}else{
 				FileUtil.deleteImage(path);
-				return Result.error("上传照片失败","");
+				return Result.error("修改信息失败","");
 			}
 		}catch (Exception e){
 			logger.error("upload error:" + e.getMessage());
-			return Result.error("上传照片失败","");
+			return Result.error("修改信息失败","");
 		}
+	}
+
+	@RequestMapping("/updateUser")
+	public Result updateUser(int id,String name, String no,String username){
+		User user = userService.getById(id);
+		user.setName(name);
+		user.setNo(no);
+		if(!username.trim().equals(""))
+			user.setUsername(username);
+
+		userService.updateById(user);
+
+		return Result.success("修改成功",user.getPhoto());
 	}
 
 	@RequestMapping("/join")
@@ -169,13 +185,15 @@ public class UserController {
         		String base64 = FileUtil.encodeBase64(photo);
         		if(base64 != null)
 					FaceUtil.addOrUpdateUser(base64,"BASE64",""+classId,""+userId);
-			}
 
-            if(sc.insert()){
-                return Result.success();
-            }else{
-                return Result.error();
-            }
+        		if(sc.insert()){
+					return Result.success();
+				}else{
+					return Result.error();
+				}
+        	}else{
+        		return Result.error("请先上传照片！");
+			}
         }
 
         return Result.success();
@@ -216,10 +234,29 @@ public class UserController {
 		record.setStart(new Date());
 
 		if(record.insert()){
-			return Result.success();
+			return Result.success("recordId",record.getId());
 		}else{
 			return Result.error("发起签到失败！");
 		}
+	}
+
+	/**
+	 * 获取课程学生人数
+	 * @param recordId
+	 * @return
+	 */
+	@RequestMapping("/studentNum")
+	public Result getCourseStudentNum(int recordId){
+		Record record = recordService.getById(recordId);
+
+		QueryWrapper<StudentCourse> queryWrapper1 = new QueryWrapper<>();
+		queryWrapper1
+				.lambda()
+				.eq(StudentCourse::getClassId,record.getCourseId());
+
+		int n = studentCourseService.count(queryWrapper1);
+
+		return Result.success("studentNum",n);
 	}
 
 	/**
@@ -327,7 +364,7 @@ public class UserController {
 	}
 
 	/**
-	 * 获取某每课程的签到记录
+	 * 获取某门课程的签到记录
 	 * @param courseId
 	 * @return
 	 */
@@ -339,12 +376,29 @@ public class UserController {
 
 	/**
 	 * 取消签到
-	 * @param courseId
+	 * @param recordId
 	 * @return
 	 */
 	@RequestMapping("/cancelSign")
-	public Result cancelSign(int courseId){
-		userService.cancelSign(courseId);
+	public Result cancelSign(int recordId){
+		userService.cancelSign(recordId);
+
+		return Result.success();
+	}
+
+	/**
+	 * 结束签到
+	 * @return
+	 */
+	@RequestMapping("/endSign")
+	public Result endSign(int recordId){
+		UpdateWrapper<Record> updateWrapper = new UpdateWrapper<>();
+		updateWrapper
+				.lambda()
+				.eq(Record::getId,recordId)
+				.set(Record::getEnd,new Date());
+
+		recordService.update(updateWrapper);
 
 		return Result.success();
 	}
